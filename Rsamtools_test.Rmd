@@ -1,0 +1,39 @@
+---
+title: "Rsamtools pileup details"
+author: "Mattthieu Foll"
+date: "28 October 2015"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r,message=F}
+library(Rsamtools)
+bam_file <- "test.bam"
+sbp <- ScanBamParam(which = GRanges("chr17", IRanges(7578425, 7578425)))
+p_param <- PileupParam(max_depth = 30000, min_base_quality = 0, include_insertions = TRUE)
+res <- pileup(bam_file, scanBamParam = sbp, pileupParam = p_param)
+res
+```
+
+Note that first four lines don't give details about the actual insertions and deletions. Samtools pilepup actually gives this information and it would be good to have them (optionally) here too. For example here: 
+
+- The 7 insertions on the + strand consist of 6 insertions of a G and 1 insertion of TCA. 
+- The 14 insertions on the - strand consist of 11 deletions of a G, 2 of a A and one of a C.
+- The 61 deletions on the + strand consist of 41 insertions of TGT, 18 of a T and 2 of TG.
+- The 2 deletions on the - strand consist of 2 deletions of a T.
+
+So one possible way would be to output a data frame like this containing the full data:
+
+```{r,echo=F}
+indels <- data.frame(
+  seqnames = "chr17",pos = 7578425,
+  strand = c("+","+","-","-","-","+","+","+","-"),
+  nucleotide = c("+G","+TCA","+G","+A","+C","-TGT","-T","-TG","-T"),
+  count = c(6,1,11,2,1,41,18,2,2),
+  which_label ="chr17:7578425-7578425"
+  )
+rbind(indels,res[5:12,])
+```
+
+Note that the last 8 lines are just the same as above, only the indels lines now show more details.
