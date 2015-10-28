@@ -1,3 +1,4 @@
+##Show how the Rsamtools pileup function could be improve to include details about indels
 
 ```r
 library(Rsamtools)
